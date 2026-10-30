@@ -1,0 +1,12 @@
+model,wit,r1,source,params_B
+Qwen2.5-0.5B,0.102,0.24,evaluate.py wit / align (last layer),0.5
+Qwen2.5-7B,0.118,,evaluate.py wit,7.0
+Qwen2.5-3B,0.125,,evaluate.py wit,3.0
+Mistral-7B,0.14,,evaluate.py wit,7.0
+CLIP text (400M pairs),,0.489,evaluate.py align,
+Qwen2.5-1.5B,0.108,,evaluate.py wit,1.5
+Qwen2.5-14B,0.130,,evaluate.py wit (runs/results/bench_main.txt),14.0
+Qwen2.5-32B,0.128,,evaluate.py wit (runs/results/bench_main.txt),32.0
+Qwen2.5-72B,0.154,,evaluate.py wit (runs/results/bench_qwen72b.txt),72.0
+Llama-3-8B,0.145,,evaluate.py wit (runs/results/bench_main.txt),8.0
+Llama-3-70B,0.151,,evaluate.py wit (runs/results/bench_llama70b.txt),70.0

@@ -1,0 +1,13 @@
+side,views,seed,mknn,r1,source
+image JEPA,good,0,0.1301,0.227,runs/results/msrvtt/dino_imggood.csv
+image JEPA,bad,0,0.1431,0.282,runs/results/msrvtt/dino_imgbad.csv
+text JEPA,good,0,0.128,0.091,runs/results/msrvtt/dino_good.csv
+text JEPA,bad,0,0.0822,0.05,runs/results/msrvtt/dino_bad.csv
+image JEPA,good,1,0.1317,0.207,runs/results/msrvtt/dino_imggood_s1.csv
+image JEPA,bad,1,0.1444,0.282,runs/results/msrvtt/dino_imgbad_s1.csv
+text JEPA,good,1,0.1291,0.084,runs/results/msrvtt/dino_good_s1.csv
+text JEPA,bad,1,0.0832,0.055,runs/results/msrvtt/dino_bad_s1.csv
+image JEPA,good,2,0.1331,0.224,runs/results/msrvtt/dino_imggood_s2.csv
+image JEPA,bad,2,0.1441,0.292,runs/results/msrvtt/dino_imgbad_s2.csv
+text JEPA,good,2,0.1314,0.079,runs/results/msrvtt/dino_good_s2.csv
+text JEPA,bad,2,0.0863,0.050,runs/results/msrvtt/dino_bad_s2.csv

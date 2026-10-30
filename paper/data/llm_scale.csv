@@ -1,0 +1,12 @@
+model,params_B,WIT-1024_mutual-kNN_dinov2-s,WIT-1024_mutual-kNN_dinov2,WIT-1024_mutual-kNN_dinov2-l,WIT-1024_mutual-kNN_dinov2-g,WIT-1024_unbiased-CKA_dinov2,COCO-5k_mutual-kNN_dinov2,COCO-5k_unbiased-CKA_dinov2,source
+Qwen2.5-0.5B,0.5,0.092,0.102,0.114,0.115,0.318,0.100,0.571,"evaluate.py wit-embed and wit (runs/results/bench_*.txt)"
+Qwen2.5-1.5B,1.5,0.101,0.108,0.123,0.124,0.324,0.089,0.538,"evaluate.py wit-embed and wit (runs/results/bench_*.txt)"
+Qwen2.5-3B,3,0.110,0.125,0.139,0.141,0.363,0.099,0.550,"evaluate.py wit-embed and wit (runs/results/bench_*.txt)"
+Qwen2.5-7B,7,0.110,0.118,0.137,0.133,0.353,0.101,0.535,"evaluate.py wit-embed and wit (runs/results/bench_*.txt)"
+Qwen2.5-14B,14,0.119,0.130,0.147,0.148,0.333,0.106,0.539,"evaluate.py wit-embed and wit (runs/results/bench_*.txt)"
+Qwen2.5-32B,32,0.116,0.128,0.145,0.144,0.336,0.104,0.533,"evaluate.py wit-embed and wit (runs/results/bench_*.txt)"
+Qwen2.5-72B,72,0.138,0.154,0.166,0.169,0.418,0.108,0.534,"evaluate.py wit-embed and wit (runs/results/bench_*.txt)"
+Mistral-7B,7,0.126,0.140,0.157,0.157,0.349,0.112,0.539,"evaluate.py wit-embed and wit (runs/results/bench_*.txt)"
+Llama-3-8B,8,0.130,0.145,0.165,0.164,0.377,0.109,0.599,"evaluate.py wit-embed and wit (runs/results/bench_*.txt)"
+Llama-3-70B,70,0.136,0.151,0.166,0.166,0.380,0.113,0.587,"evaluate.py wit-embed and wit (runs/results/bench_*.txt)"
+"ours: good text JEPA, 109M (seed 0; tab:llms gives the three-seed means)",0.109,0.170,0.191,0.199,0.203,0.518,0.169,0.620,"evaluate.py wit-embed and wit (runs/results/bench_*.txt)"

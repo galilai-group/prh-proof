@@ -1,0 +1,51 @@
+objective,encoder,params_M,data,images_M,seed,wit,r1,source
+good,BERT-S,33,recap,2.16,0,0.107,0.316,job 1033723 (recap:300)
+good,BERT-S,33,recap,10.0,0,0.113,0.358,job 1038862 (recaptext:50)
+good,BERT-S,33,recap,50.0,0,0.129,0.37,job 1044221 (recaptext:250)
+good,BERT-S,33,recap,50.0,1,0.118,0.378,job 1048927 (recaptext:250 seed 1)
+good,BERT-S,33,recap,100.0,0,0.129,0.4,job 1047594 (recaptext:500)
+bad,BERT-S,33,recap,2.16,0,0.053,0.255,job 1033724
+bad,BERT-S,33,recap,50.0,0,0.066,0.301,job 1048925
+ntp,BERT-S,33,recap,2.16,0,0.07,0.228,job 1033725
+ntp,BERT-S,33,recap,50.0,0,0.079,0.254,job 1048926
+good,BERT-B,109,recap,2.16,0,0.107,0.393,job 1034628
+good,BERT-B,109,recap,10.0,0,0.1,0.396,job 1044220
+good,BERT-B,109,recap,50.0,0,0.114,0.412,job 1047595
+good,BERT-B,109,recap,50.0,1,0.11,0.406,job 1054534 (recaptext:250 base seed 1)
+good,BERT-B,109,recap,50.0,2,0.123,0.405,job 1054543 (recaptext:250 base seed 2)
+good,BERT-T,11,flickr+coco,,0,,0.335,job 1037597
+good,BERT-S,33,flickr+coco,,0,,0.367,job 1037598
+good,BERT-B,109,flickr+coco,,0,,0.4,job 1037599
+good,BERT-L,335,flickr+coco,,0,,0.376,job 1046657
+good,BERT-S,33,flickr,,0,,0.354,job 1023828
+good,BERT-S,33,flickr,,1,,0.34,job 1024176
+good,BERT-S,33,flickr,,2,,0.344,runs/results/text-cap-s2.txt (seed 2)
+good,BERT-B,109,flickr,,0,,0.363,job 1034622
+good,BERT-S,33,recap,2.16,1,0.113,0.349,job 1054527 (recap2-text-cap-s1)
+good,BERT-S,33,recap,2.16,2,0.104,0.34,job 1054536 (recap2-text-cap-s2)
+good,BERT-S,33,recap,10.0,1,0.118,0.338,job 1054530 (rt50-s64-s1)
+good,BERT-S,33,recap,10.0,2,0.101,0.347,job 1054539 (rt50-s64-s2)
+bad,BERT-S,33,recap,2.16,1,0.055,0.265,job 1054528 (recap2-text-s1)
+bad,BERT-S,33,recap,2.16,2,0.052,0.253,job 1054537 (recap2-text-s2)
+ntp,BERT-S,33,recap,2.16,1,0.071,0.246,job 1054529 (recap2-text-ntp-s1)
+ntp,BERT-S,33,recap,2.16,2,0.071,0.223,job 1054538 (recap2-text-ntp-s2)
+ntp,BERT-S,33,recap,50.0,1,0.078,0.254,job 1054532 (rt250-ntp-long-s1)
+ntp,BERT-S,33,recap,50.0,2,0.08,0.256,job 1054541 (rt250-ntp-long-s2)
+good,BERT-S,33,recap,50.0,2,0.127,0.381,job 1054545 (rt250-s64-long-s2)
+bad,BERT-S,33,recap,50.0,2,0.062,0.283,job 1054540 (rt250-masked-long-s2)
+bad,BERT-S,33,recap,50.0,1,0.062,0.286,job 1054531 (rt250-masked-long-s1)
+good,BERT-S,33,recap,100.0,1,0.12,0.395,job 1054533 (rt500-s64-xl-s1)
+good,BERT-S,33,recap,100.0,2,0.125,0.41,job 1054542 (rt500-s64-xl-s2)
+good,BERT-B,109,recap,940.0,0,0.191,0.464,job 1055817 (recaptext:4627 base 16 GPUs) final (runs/results/rtall-final.txt)
+good,BERT-B,109,recap,2.16,1,0.108,0.399,job 1063523 (recap-base-text-cap-s1)
+good,BERT-B,109,recap,2.16,2,0.112,0.372,job 1063527 (recap-base-text-cap-s2)
+good,BERT-B,109,recap,10.0,1,0.099,0.382,job 1063524 (rt50-b64-s1)
+good,BERT-B,109,recap,10.0,2,0.114,0.382,job 1063528 (rt50-b64-s2)
+bad,BERT-B,109,recap,940.0,0,0.088,0.318,job 1076223 (recaptext:4627 base 8 GPUs lambda .01) final (runs/results/rtall-masked-b64-l01.txt)
+good,BERT-B,109,recap,940.0,2,0.179,0.485,job 1076222 (recaptext:4627 base 8 GPUs lambda .01) final (runs/results/rtall-b64-l01-s2.txt)
+ntp,BERT-B,109,recap,940.0,1,0.111,0.332,job 1076224 (recaptext:4627 base 8 GPUs next-token) final (runs/results/rtall-ntp-b64-s1-low.txt)
+good,BERT-B,109,recap,940.0,1,0.181,0.484,job 1076221 (recaptext:4627 base 8 GPUs lambda .01) final (runs/results/rtall-b64-l01-s1.txt)
+ntp,BERT-B,109,recap,940.0,2,0.112,0.328,job 1063525 (recaptext:4627 base 8 GPUs next-token) final (runs/results/rtall-ntp-b64-s2.txt)
+ntp,BERT-B,109,recap,940.0,0,0.109,0.346,job 1063008 (recaptext:4627 base 8 GPUs next-token) final (runs/results/rtall-ntp-b64-r.txt)
+bad,BERT-B,109,recap,940.0,1,0.085,0.309,job 1088356 (recaptext:4627 base 8 GPUs lambda .01) final (runs/results/rtall-masked-b64-l01-s1.txt)
+bad,BERT-B,109,recap,940.0,2,0.088,0.348,job 1088357 (recaptext:4627 base 8 GPUs lambda .01) final (runs/results/rtall-masked-b64-l01-s2.txt)

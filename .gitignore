@@ -1,0 +1,17 @@
+# outputs: runs, checkpoints, embeddings, evaluation figures (the paper's figures live in paper/figs)
+runs/
+/figs/
+# OnlineWriter mkdirs its relative path in CWD at construction; real dumps go to <run_dir>/embeddings
+embeddings/
+lightning_logs/
+# downloaded data (python -m prh.data)
+/data/
+__pycache__/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.claude/
+# the web demo (Gradio app, Hugging Face Space) lives outside the paper's repository
+demo.py
+space/
+docs/demo.md

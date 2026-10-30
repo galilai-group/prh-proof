@@ -1,0 +1,13 @@
+image,text,seed,mknn,r1,source
+good,good,0,0.0664,0.027,evaluate.py align (runs/results/msrvtt/good_good.csv)
+good,bad,0,0.043,0.025,evaluate.py align (runs/results/msrvtt/good_bad.csv)
+bad,good,0,0.0592,0.022,evaluate.py align (runs/results/msrvtt/bad_good.csv)
+bad,bad,0,0.036,0.018,evaluate.py align (runs/results/msrvtt/bad_bad.csv)
+good,good,1,0.0677,0.03,evaluate.py align (runs/results/msrvtt/good_good_s1.csv)
+good,bad,1,0.0407,0.021,evaluate.py align (runs/results/msrvtt/good_bad_s1.csv)
+bad,good,1,0.0565,0.025,evaluate.py align (runs/results/msrvtt/bad_good_s1.csv)
+bad,bad,1,0.0391,0.014,evaluate.py align (runs/results/msrvtt/bad_bad_s1.csv)
+good,good,2,0.0671,0.039,evaluate.py align (runs/results/msrvtt/good_good_s2.csv)
+good,bad,2,0.0439,0.015,evaluate.py align (runs/results/msrvtt/good_bad_s2.csv)
+bad,good,2,0.0609,0.025,evaluate.py align (runs/results/msrvtt/bad_good_s2.csv)
+bad,bad,2,0.0426,0.018,evaluate.py align (runs/results/msrvtt/bad_bad_s2.csv)

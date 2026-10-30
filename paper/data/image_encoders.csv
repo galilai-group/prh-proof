@@ -1,0 +1,29 @@
+image,family,pooling,text,mknn,r1,r5,source
+"DINOv2 ViT-B/14",DINOv2,CLS,"BERT-B, 50M",0.234,0.412,0.733,runs/results/dinov2_sizes.txt
+"DINOv2 ViT-B/14",DINOv2,CLS,"BERT-S, 100M",0.229,0.400,0.711,runs/results/dinov2_sizes.txt
+"DINOv2 ViT-L/14",DINOv2,CLS,"BERT-B, 50M",0.242,0.437,0.745,runs/results/dinov2_sizes.txt
+"DINOv2 ViT-L/14",DINOv2,CLS,"BERT-S, 100M",0.239,0.410,0.732,runs/results/dinov2_sizes.txt
+"DINOv2 ViT-g/14",DINOv2,CLS,"BERT-B, 50M",0.245,0.437,0.769,runs/results/dinov2_sizes.txt
+"DINOv2 ViT-g/14",DINOv2,CLS,"BERT-S, 100M",0.241,0.425,0.741,runs/results/dinov2_sizes.txt
+"DINOv2 ViT-g/14",DINOv2,CLS + mean patch,"BERT-B, 50M",0.250,0.460,0.784,runs/results/image_dinov2-g+avg.txt
+"DINOv2 ViT-g/14",DINOv2,CLS + mean patch,"BERT-S, 100M",0.246,0.440,0.763,runs/results/image_dinov2-g+avg.txt
+"DINOv3 ViT-L/16",DINOv3,CLS,"BERT-B, 50M",0.209,0.436,0.722,runs/results/image_dinov3-l.txt
+"DINOv3 ViT-L/16",DINOv3,CLS,"BERT-S, 100M",0.206,0.414,0.703,runs/results/image_dinov3-l.txt
+"DINOv3 ViT-L/16",DINOv3,CLS + mean patch,"BERT-B, 50M",0.234,0.514,0.792,runs/results/image_dinov3-l+avg.txt
+"DINOv3 ViT-L/16",DINOv3,CLS + mean patch,"BERT-S, 100M",0.230,0.489,0.780,runs/results/image_dinov3-l+avg.txt
+"DINOv3 ViT-H+/16",DINOv3,CLS,"BERT-B, 50M",0.181,0.353,0.625,runs/results/image_dinov3-h.txt
+"DINOv3 ViT-H+/16",DINOv3,CLS,"BERT-S, 100M",0.180,0.342,0.607,runs/results/image_dinov3-h.txt
+"DINOv3 ViT-H+/16",DINOv3,CLS + mean patch,"BERT-B, 50M",0.228,0.479,0.779,runs/results/image_dinov3-h+avg.txt
+"DINOv3 ViT-H+/16",DINOv3,CLS + mean patch,"BERT-S, 100M",0.225,0.486,0.775,runs/results/image_dinov3-h+avg.txt
+"DINOv3 ViT-7B/16",DINOv3,CLS,"BERT-B, 50M",0.207,0.455,0.752,runs/results/image_dinov3-7b.txt
+"DINOv3 ViT-7B/16",DINOv3,CLS,"BERT-S, 100M",0.202,0.452,0.730,runs/results/image_dinov3-7b.txt
+"DINOv3 ViT-7B/16",DINOv3,CLS + mean patch,"BERT-B, 50M",0.231,0.531,0.803,runs/results/image_dinov3-7b+avg.txt
+"DINOv3 ViT-7B/16",DINOv3,CLS + mean patch,"BERT-S, 100M",0.226,0.523,0.798,runs/results/image_dinov3-7b+avg.txt
+"I-JEPA ViT-H/14 (IN-22k)",I-JEPA,mean patch,"BERT-B, 50M",0.109,0.188,0.451,runs/results/image_ijepa-h.txt
+"I-JEPA ViT-H/14 (IN-22k)",I-JEPA,mean patch,"BERT-S, 100M",0.110,0.183,0.436,runs/results/image_ijepa-h.txt
+"I-JEPA ViT-g/16 (IN-22k)",I-JEPA,mean patch,"BERT-B, 50M",0.140,0.246,0.502,runs/results/image_ijepa-g.txt
+"I-JEPA ViT-g/16 (IN-22k)",I-JEPA,mean patch,"BERT-S, 100M",0.141,0.234,0.491,runs/results/image_ijepa-g.txt
+"DINOv2-g + DINOv3-L",concatenated,"CLS + mean patch, unit RMS each","BERT-B, 50M",0.255,0.505,0.806,evaluate.py embed dinov2-g+avg,dinov3-<l|7b>+avg and align (runs/results/combo_rows.txt)
+"DINOv2-g + DINOv3-L",concatenated,"CLS + mean patch, unit RMS each","BERT-S, 100M",0.252,0.488,0.791,evaluate.py embed dinov2-g+avg,dinov3-<l|7b>+avg and align (runs/results/combo_rows.txt)
+"DINOv2-g + DINOv3-7B",concatenated,"CLS + mean patch, unit RMS each","BERT-B, 50M",0.256,0.535,0.824,evaluate.py embed dinov2-g+avg,dinov3-<l|7b>+avg and align (runs/results/combo_rows.txt)
+"DINOv2-g + DINOv3-7B",concatenated,"CLS + mean patch, unit RMS each","BERT-S, 100M",0.252,0.511,0.801,evaluate.py embed dinov2-g+avg,dinov3-<l|7b>+avg and align (runs/results/combo_rows.txt)

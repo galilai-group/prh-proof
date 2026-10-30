@@ -1,0 +1,37 @@
+image,text,seed,wit,source
+"ViT-S, Recap 2M",good,0,0.080,evaluate.py wit image-jepa-recap:text-rt250-s64-long
+"ViT-S, Recap 2M",good,1,0.076,evaluate.py wit image-jepa-recap:text-rt250-s64-long-s1
+"ViT-S, Recap 2M",ntp,0,0.056,evaluate.py wit image-jepa-recap:text-rt250-ntp-long
+"ViT-S, Recap 2M",bad,0,0.049,evaluate.py wit image-jepa-recap:text-rt250-masked-long
+"ViT-B, Recap 10M",good,0,0.082,evaluate.py wit image-jepa-recap10m-vitb:text-rt250-s64-long
+"ViT-B, Recap 10M",good,1,0.076,evaluate.py wit image-jepa-recap10m-vitb:text-rt250-s64-long-s1
+"ViT-B, Recap 10M",ntp,0,0.057,evaluate.py wit image-jepa-recap10m-vitb:text-rt250-ntp-long
+"ViT-B, Recap 10M",bad,0,0.049,evaluate.py wit image-jepa-recap10m-vitb:text-rt250-masked-long
+"ViT-S, ImageNet",good,0,0.098,evaluate.py wit image-jepa-in1k-vits:text-rt250-s64-long
+"ViT-S, ImageNet",good,1,0.091,evaluate.py wit image-jepa-in1k-vits:text-rt250-s64-long-s1
+"ViT-S, ImageNet",ntp,0,0.062,evaluate.py wit image-jepa-in1k-vits:text-rt250-ntp-long
+"ViT-S, ImageNet",bad,0,0.055,evaluate.py wit image-jepa-in1k-vits:text-rt250-masked-long
+"DINOv2 ViT-B",good,0,0.129,evaluate.py wit dinov2:text-rt250-s64-long
+"DINOv2 ViT-B",good,1,0.118,evaluate.py wit dinov2:text-rt250-s64-long-s1
+"DINOv2 ViT-B",ntp,0,0.079,evaluate.py wit dinov2:text-rt250-ntp-long
+"DINOv2 ViT-B",bad,0,0.066,evaluate.py wit dinov2:text-rt250-masked-long
+"ViT-S, Recap 2M",ntp,1,0.057,evaluate.py wit image-jepa-recap:text-rt250-ntp-long-s1
+"ViT-B, Recap 10M",ntp,1,0.058,evaluate.py wit image-jepa-recap10m-vitb:text-rt250-ntp-long-s1
+"ViT-S, ImageNet",ntp,1,0.062,evaluate.py wit image-jepa-in1k-vits:text-rt250-ntp-long-s1
+"DINOv2 ViT-B",ntp,1,0.078,evaluate.py wit dinov2:text-rt250-ntp-long-s1
+"ViT-S, Recap 2M",ntp,2,0.057,evaluate.py wit image-jepa-recap:text-rt250-ntp-long-s2
+"ViT-B, Recap 10M",ntp,2,0.058,evaluate.py wit image-jepa-recap10m-vitb:text-rt250-ntp-long-s2
+"ViT-S, ImageNet",ntp,2,0.062,evaluate.py wit image-jepa-in1k-vits:text-rt250-ntp-long-s2
+"DINOv2 ViT-B",ntp,2,0.080,evaluate.py wit dinov2:text-rt250-ntp-long-s2
+"ViT-S, Recap 2M",good,2,0.082,evaluate.py wit image-jepa-recap:text-rt250-s64-long-s2
+"ViT-B, Recap 10M",good,2,0.081,evaluate.py wit image-jepa-recap10m-vitb:text-rt250-s64-long-s2
+"ViT-S, ImageNet",good,2,0.096,evaluate.py wit image-jepa-in1k-vits:text-rt250-s64-long-s2
+"DINOv2 ViT-B",good,2,0.127,evaluate.py wit dinov2:text-rt250-s64-long-s2
+"ViT-S, Recap 2M",bad,2,0.047,evaluate.py wit image-jepa-recap:text-rt250-masked-long-s2
+"ViT-B, Recap 10M",bad,2,0.046,evaluate.py wit image-jepa-recap10m-vitb:text-rt250-masked-long-s2
+"ViT-S, ImageNet",bad,2,0.050,evaluate.py wit image-jepa-in1k-vits:text-rt250-masked-long-s2
+"DINOv2 ViT-B",bad,2,0.062,evaluate.py wit dinov2:text-rt250-masked-long-s2
+"ViT-S, Recap 2M",bad,1,0.049,evaluate.py wit image-jepa-recap:text-rt250-masked-long-s1
+"ViT-B, Recap 10M",bad,1,0.048,evaluate.py wit image-jepa-recap10m-vitb:text-rt250-masked-long-s1
+"ViT-S, ImageNet",bad,1,0.053,evaluate.py wit image-jepa-in1k-vits:text-rt250-masked-long-s1
+"DINOv2 ViT-B",bad,1,0.062,evaluate.py wit dinov2:text-rt250-masked-long-s1

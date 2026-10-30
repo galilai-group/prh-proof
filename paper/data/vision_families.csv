@@ -1,0 +1,136 @@
+vision,text,wit,source
+mae-b,text-rt250-s64-long,0.074,evaluate.py wit and align (runs/results/mae_grid.txt)
+mae-b,text-rt250-masked-long,0.045,evaluate.py wit and align (runs/results/mae_grid.txt)
+mae-b,text-rt250-ntp-long,0.053,evaluate.py wit and align (runs/results/mae_grid.txt)
+mae-b,text-rtall-final,0.1,evaluate.py wit mae-b:text-rtall-final (final checkpoint of job 1055817; runs/results/audit_wit.txt)
+mae-b,qwen0.5b,0.06,evaluate.py wit and align (runs/results/mae_grid.txt)
+mae-b,qwen7b,0.067,evaluate.py wit and align (runs/results/mae_grid.txt)
+mae-b,mistral7b,0.077,evaluate.py wit and align (runs/results/mae_grid.txt)
+mae-l,text-rt250-s64-long,0.093,evaluate.py wit and align (runs/results/mae_grid.txt)
+mae-l,text-rt250-masked-long,0.05,evaluate.py wit and align (runs/results/mae_grid.txt)
+mae-l,text-rt250-ntp-long,0.059,evaluate.py wit and align (runs/results/mae_grid.txt)
+mae-l,text-rtall-final,0.126,evaluate.py wit mae-l:text-rtall-final (final checkpoint of job 1055817; runs/results/audit_wit.txt)
+mae-l,qwen0.5b,0.074,evaluate.py wit and align (runs/results/mae_grid.txt)
+mae-l,qwen7b,0.084,evaluate.py wit and align (runs/results/mae_grid.txt)
+mae-l,mistral7b,0.097,evaluate.py wit and align (runs/results/mae_grid.txt)
+mae-h,text-rt250-s64-long,0.092,evaluate.py wit and align (runs/results/mae_grid.txt)
+mae-h,text-rt250-masked-long,0.05,evaluate.py wit and align (runs/results/mae_grid.txt)
+mae-h,text-rt250-ntp-long,0.058,evaluate.py wit and align (runs/results/mae_grid.txt)
+mae-h,text-rtall-final,0.125,evaluate.py wit mae-h:text-rtall-final (final checkpoint of job 1055817; runs/results/audit_wit.txt)
+mae-h,qwen0.5b,0.071,evaluate.py wit and align (runs/results/mae_grid.txt)
+mae-h,qwen7b,0.084,evaluate.py wit and align (runs/results/mae_grid.txt)
+mae-h,mistral7b,0.096,evaluate.py wit and align (runs/results/mae_grid.txt)
+ijepa-h,text-rt250-s64-long,0.095,evaluate.py wit and align (runs/results/mae_grid.txt)
+ijepa-h,text-rt250-masked-long,0.051,evaluate.py wit and align (runs/results/mae_grid.txt)
+ijepa-h,text-rt250-ntp-long,0.059,evaluate.py wit and align (runs/results/mae_grid.txt)
+ijepa-h,text-rtall-final,0.129,evaluate.py wit ijepa-h:text-rtall-final (final checkpoint of job 1055817; runs/results/audit_wit.txt)
+ijepa-h,qwen0.5b,0.068,evaluate.py wit and align (runs/results/mae_grid.txt)
+ijepa-h,qwen7b,0.081,evaluate.py wit and align (runs/results/mae_grid.txt)
+ijepa-h,mistral7b,0.096,evaluate.py wit and align (runs/results/mae_grid.txt)
+dinov2,text-rt250-s64-long,0.129,evaluate.py wit and align (runs/results/mae_grid.txt)
+dinov2,text-rt250-masked-long,0.066,evaluate.py wit and align (runs/results/mae_grid.txt)
+dinov2,text-rt250-ntp-long,0.079,evaluate.py wit and align (runs/results/mae_grid.txt)
+dinov2,text-rtall-final,0.191,evaluate.py wit dinov2:text-rtall-final (final checkpoint of job 1055817; runs/results/audit_wit.txt)
+dinov2,qwen0.5b,0.102,evaluate.py wit and align (runs/results/mae_grid.txt)
+dinov2,qwen7b,0.118,evaluate.py wit and align (runs/results/mae_grid.txt)
+dinov2,mistral7b,0.14,evaluate.py wit and align (runs/results/mae_grid.txt)
+dinov2-l,text-rt250-s64-long,0.133,evaluate.py wit and align (runs/results/mae_grid.txt)
+dinov2-l,text-rt250-masked-long,0.069,evaluate.py wit and align (runs/results/mae_grid.txt)
+dinov2-l,text-rt250-ntp-long,0.084,evaluate.py wit and align (runs/results/mae_grid.txt)
+dinov2-l,text-rtall-final,0.199,evaluate.py wit dinov2-l:text-rtall-final (final checkpoint of job 1055817; runs/results/audit_wit.txt)
+dinov2-l,qwen0.5b,0.114,evaluate.py wit and align (runs/results/mae_grid.txt)
+dinov2-l,qwen7b,0.137,evaluate.py wit and align (runs/results/mae_grid.txt)
+dinov2-l,mistral7b,0.157,evaluate.py wit and align (runs/results/mae_grid.txt)
+clip-b,text-rtall-final,0.221,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-b,text-rtall-b64-l01-s1,0.215,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-b,text-rtall-b64-l01-s2,0.21,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-b,text-rtall-b64-s1,0.145,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-b,text-rtall-masked-b64-l01,0.108,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-b,text-rtall-masked-b64-l01-s1,0.103,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-b,text-rtall-masked-b64-l01-s2,0.106,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-b,text-rtall-ntp-b64-r,0.137,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-b,text-rtall-ntp-b64-s1-low,0.136,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-b,text-rtall-ntp-b64-s2,0.137,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-b,text-rt500-final,0.15,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-b,text-rt500-s64-xl-s1,0.14,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-b,text-rt500-s64-xl-s2,0.147,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-b,text-rt250-s64-long,0.147,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-b,text-rt250-s64-long-s1,0.133,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-b,text-rt250-s64-long-s2,0.147,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-b,text-rt250-masked-long,0.076,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-b,text-rt250-ntp-long,0.093,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-b,qwen0.5b,0.135,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-b,qwen1.5b,0.141,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-b,qwen3b,0.164,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-b,qwen7b,0.156,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-b,qwen14b,0.171,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-b,qwen32b,0.168,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-b,qwen72b,0.193,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-b,llama3-8b,0.187,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-b,llama3-70b,0.188,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-b,mistral7b,0.18,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-b,bert,0.145,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-b,mpnet,0.148,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-b,clip,0.151,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-l,text-rtall-final,0.224,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-l,text-rtall-b64-l01-s1,0.217,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-l,text-rtall-b64-l01-s2,0.215,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-l,text-rtall-b64-s1,0.15,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-l,text-rtall-masked-b64-l01,0.112,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-l,text-rtall-masked-b64-l01-s1,0.108,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-l,text-rtall-masked-b64-l01-s2,0.11,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-l,text-rtall-ntp-b64-r,0.144,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-l,text-rtall-ntp-b64-s1-low,0.145,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-l,text-rtall-ntp-b64-s2,0.144,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-l,text-rt500-final,0.155,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-l,text-rt500-s64-xl-s1,0.143,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-l,text-rt500-s64-xl-s2,0.149,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-l,text-rt250-s64-long,0.148,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-l,text-rt250-s64-long-s1,0.138,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-l,text-rt250-s64-long-s2,0.147,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-l,text-rt250-masked-long,0.078,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-l,text-rt250-ntp-long,0.098,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-l,qwen0.5b,0.144,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-l,qwen1.5b,0.152,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-l,qwen3b,0.175,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-l,qwen7b,0.164,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-l,qwen14b,0.182,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-l,qwen32b,0.181,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-l,qwen72b,0.203,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-l,llama3-8b,0.2,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-l,llama3-70b,0.201,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-l,mistral7b,0.194,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-l,bert,0.152,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-l,mpnet,0.155,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-l,clip,0.154,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-h,text-rtall-final,0.233,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-h,text-rtall-b64-l01-s1,0.23,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-h,text-rtall-b64-l01-s2,0.227,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-h,text-rtall-b64-s1,0.157,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-h,text-rtall-masked-b64-l01,0.116,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-h,text-rtall-masked-b64-l01-s1,0.111,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-h,text-rtall-masked-b64-l01-s2,0.114,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-h,text-rtall-ntp-b64-r,0.145,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-h,text-rtall-ntp-b64-s1-low,0.146,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-h,text-rtall-ntp-b64-s2,0.147,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-h,text-rt500-final,0.163,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-h,text-rt500-s64-xl-s1,0.149,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-h,text-rt500-s64-xl-s2,0.155,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-h,text-rt250-s64-long,0.156,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-h,text-rt250-s64-long-s1,0.143,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-h,text-rt250-s64-long-s2,0.155,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-h,text-rt250-masked-long,0.08,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-h,text-rt250-ntp-long,0.099,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-h,qwen0.5b,0.148,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-h,qwen1.5b,0.156,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-h,qwen3b,0.178,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-h,qwen7b,0.169,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-h,qwen14b,0.187,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-h,qwen32b,0.186,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-h,qwen72b,0.21,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-h,llama3-8b,0.201,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-h,llama3-70b,0.206,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-h,mistral7b,0.196,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-h,bert,0.155,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-h,mpnet,0.159,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"
+clip-h,clip,0.159,"evaluate.py wit-embed clip-{b,l,h} and wit (runs/results/wit_clip.txt)"

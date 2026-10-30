@@ -1,0 +1,10 @@
+pairs,method,cider,source
+100,captioner,0.244,figs/captions_n3.0
+300,captioner,0.317,figs/captions_n3.0
+1014,captioner,0.396,figs/captions_n3.0
+30014,captioner,0.431,figs/captions_rot30k_n3.0
+30,captioner + refinement,0.169,figs/captions_n3.0_refine
+100,captioner + refinement,0.294,figs/captions_n3.0_refine
+1014,retrieval,0.158,figs/captions_n3.0
+30014,retrieval,0.188,figs/captions_rot30k_n3.0
+1014,oracle,0.628,figs/captions_n3.0

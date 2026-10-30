@@ -1,0 +1,15 @@
+clip,words,decoding,BLEU-4,CIDEr,METEOR,ROUGE-L,clips,table,source,map,mutual 10-NN (no map),t2v R@1,t2v R@5,t2v R@10,v2t R@1,v2t R@5,v2t R@10
+human captions,9.3154,,,,,,,"captioning, 2,990 test clips",runs/results/video/captioning.csv,,,,,,,,
+mean of 8 frames,12.3344,consensus32,0.1863,0.2682,0.2318,0.4714,2990.0,"captioning, 2,990 test clips",runs/results/video/captioning.csv,,,,,,,,
+mean of 8 frames,12.8187,beam3,0.1744,0.2445,0.2241,0.4605,2990.0,"captioning, 2,990 test clips",runs/results/video/captioning.csv,,,,,,,,
+middle frame,11.9585,consensus32,0.1721,0.2418,0.2186,0.4574,2990.0,"captioning, 2,990 test clips",runs/results/video/captioning.csv,,,,,,,,
+middle frame,12.487,beam3,0.1602,0.2238,0.214,0.4463,2990.0,"captioning, 2,990 test clips",runs/results/video/captioning.csv,,,,,,,,
+"mean of 8 frames, --rotation",11.3532,consensus32,0.1657,0.2457,0.2056,0.4436,2990.0,"captioning, 2,990 test clips",runs/results/video/captioning.csv,,,,,,,,
+"mean of 8 frames, --rotation",11.9746,beam3,0.1544,0.2217,0.2039,0.4319,2990.0,"captioning, 2,990 test clips",runs/results/video/captioning.csv,,,,,,,,
+oracle: text JEPA of a human caption,9.5692,consensus32,0.2567,0.3827,0.2646,0.5376,2990.0,"captioning, 2,990 test clips",runs/results/video/captioning.csv,,,,,,,,
+mean of 8 frames,,,,,,,,"alignment and retrieval, 1k-A",runs/results/video/alignment.csv,captioner map,0.1674,0.172,0.407,0.517,0.203,0.419,0.526
+mean of 8 frames,,,,,,,,"alignment and retrieval, 1k-A",runs/results/video/alignment.csv,--rotation,0.1674,0.165,0.388,0.491,0.186,0.401,0.504
+mean of 8 frames,,,,,,,,"alignment and retrieval, 1k-A",runs/results/video/alignment.csv,refitted on the 9k training clips,0.1674,0.193,0.456,0.579,0.205,0.443,0.556
+middle frame,,,,,,,,"alignment and retrieval, 1k-A",runs/results/video/alignment.csv,captioner map,0.1479,0.145,0.331,0.449,0.171,0.364,0.464
+middle frame,,,,,,,,"alignment and retrieval, 1k-A",runs/results/video/alignment.csv,--rotation,0.1479,0.127,0.317,0.412,0.165,0.342,0.436
+middle frame,,,,,,,,"alignment and retrieval, 1k-A",runs/results/video/alignment.csv,refitted on the 9k training clips,0.1479,0.188,0.394,0.498,0.17,0.376,0.488

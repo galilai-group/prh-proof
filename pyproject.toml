@@ -1,0 +1,63 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "prh-jepa"
+version = "0.1.0"
+description = "Proving and Improving the Platonic Representation Hypothesis with JEPAs: code, experiments and demo"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.11"
+dependencies = [
+    # training lifecycle, LeJEPA, callbacks (the paper's runs used revision ab836bf; docs/reproduce.md)
+    "stable-pretraining @ git+https://github.com/galilai-group/stable-pretraining",
+    "torch>=2.6",
+    "transformers>=4.56",  # from_pretrained(dtype=...)
+    "timm>=1.0",
+    "numpy",
+    "pandas",
+    "pyarrow",
+    "pillow",
+    "scipy",
+    "POT>=0.9",          # optimal transport: unpaired refinement of the rotation
+    "datasets>=2.20",    # WIT-1024 benchmark of the PRH paper
+    "pycocoevalcap",     # BLEU and CIDEr
+    "matplotlib",
+    "scikit-learn",      # t-SNE figures
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "ruff>=0.6"]
+pairfree = [  # evaluate.py pairfree: the code of Schnaus et al. (2026) at the commit we ran, and its QAP solver's version
+    "unpaired-rosetta @ git+https://github.com/dominik-schnaus/unpaired-rosetta@fdfad84ea488f29702a61a455be71622c4ff5d49",
+    "pylibmgm==1.1.2",
+]
+video = ["decord>=0.6", "opencv-python>=4"]   # MSR-VTT frames (prh.data.extract_frames)
+
+[tool.setuptools]
+packages = ["prh"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]  # the scripts (train, evaluate, caption, demo) are importable
+markers = ["slow: end-to-end training runs (a few minutes on CPU)"]
+filterwarnings = ["ignore::DeprecationWarning"]
+
+[tool.ruff]
+line-length = 130
+target-version = "py311"
+extend-exclude = ["runs", "paper", "data"]
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I", "D"]
+ignore = ["D100", "D102", "D103", "D104", "D105", "D107", "D208", "E731"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["D"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["prh"]

@@ -1,0 +1,10 @@
+method,BLEU-4,CIDEr,text,seed,objective,selected by the objective,source
+oracle (true text embedding),0.252,0.673,,,,False,runs/results/pairfree/captioner/scores.csv
+"zero-pair captioner, rotation from 30014 pairs",0.165,0.43,,,,False,runs/results/pairfree/captioner/scores.csv
+random rotation,0.048,0.028,,,,False,runs/results/pairfree/captioner/scores.csv
+retrieve nearest caption (30014 pairs),0.067,0.227,,,,False,runs/results/pairfree/captioner/scores.csv
+zero-pair map (flickr_rt500-final_wp0_s0),0.101,0.208,rt500-final,0.0,0.42787572741508484,True,runs/results/pairfree/captioner/scores.csv
+zero-pair map (flickr_rt500-final_wp0_s1),0.078,0.133,rt500-final,1.0,0.41584882140159607,False,runs/results/pairfree/captioner/scores.csv
+zero-pair map (flickr_rt500-final_wp0_s2),0.072,0.107,rt500-final,2.0,0.4131523072719574,False,runs/results/pairfree/captioner/scores.csv
+zero-pair map (flickr_rt500-final_wp0_s3),0.09,0.195,rt500-final,3.0,0.4214721918106079,False,runs/results/pairfree/captioner/scores.csv
+zero-pair map (flickr_rt500-final_wp0_s4),0.086,0.148,rt500-final,4.0,0.4176451563835144,False,runs/results/pairfree/captioner/scores.csv

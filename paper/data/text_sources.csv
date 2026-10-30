@@ -1,0 +1,28 @@
+images_M,texts,views,seed,wit,r1,source
+2.24,LLaVA recaptions,good,0,0.082,0.351,runs/results/rt11llava-good-s0.txt
+2.24,LLaVA recaptions,good,1,0.081,0.348,runs/results/rt11llava-good-s1.txt
+2.24,LLaVA recaptions,good,2,0.076,0.346,runs/results/rt11llava-good-s2.txt
+2.24,all three,good,0,0.095,0.344,runs/results/rt11full-good-s0.txt
+2.24,all three,good,1,0.112,0.336,runs/results/rt11full-good-s1.txt
+2.24,all three,good,2,0.115,0.338,runs/results/rt11full-good-s2.txt
+2.24,alt-text,bad,0,0.056,0.179,runs/results/rt11alt-bad-s0.txt
+2.24,alt-text,bad,1,0.054,0.18,runs/results/rt11alt-bad-s1.txt
+2.24,alt-text,bad,2,0.055,0.18,runs/results/rt11alt-bad-s2.txt
+2.24,alt-text + text-only paraphrase,good,0,0.058,0.234,runs/results/rt11altpara-good-s0.txt
+2.24,alt-text + text-only paraphrase,good,1,0.06,0.235,runs/results/rt11altpara-good-s1.txt
+2.24,alt-text + text-only paraphrase,good,2,0.061,0.23,runs/results/rt11altpara-good-s2.txt
+50.0,LLaVA recaptions,bad,0,0.092,0.323,runs/results/rt250llava-bad-s0.txt
+50.0,LLaVA recaptions,bad,1,0.09,0.324,runs/results/rt250llava-bad-s1.txt
+50.0,LLaVA recaptions,bad,2,0.093,0.329,runs/results/rt250llava-bad-s2.txt
+50.0,LLaVA recaptions,good,0,0.095,0.373,runs/results/rt250llava-good-s0.txt
+50.0,LLaVA recaptions,good,1,0.1,0.396,runs/results/rt250llava-good-s1.txt
+50.0,LLaVA recaptions,good,2,0.093,0.39,runs/results/rt250llava-good-s2.txt
+50.0,all three,bad,0,0.066,0.301,scaling.csv (job 1048925)
+50.0,all three,bad,1,0.062,0.286,scaling.csv (job 1054531 (rt250-masked-long-s1))
+50.0,all three,bad,2,0.062,0.283,scaling.csv (job 1054540 (rt250-masked-long-s2))
+50.0,all three,good,0,0.129,0.37,scaling.csv (job 1044221 (recaptext:250))
+50.0,all three,good,1,0.118,0.378,scaling.csv (job 1048927 (recaptext:250 seed 1))
+50.0,all three,good,2,0.127,0.381,scaling.csv (job 1054545 (rt250-s64-long-s2))
+50.0,alt-text,bad,0,0.056,0.203,runs/results/rt250alt-bad-s0.txt
+50.0,alt-text,bad,1,0.057,0.201,runs/results/rt250alt-bad-s1.txt
+50.0,alt-text,bad,2,0.056,0.193,runs/results/rt250alt-bad-s2.txt

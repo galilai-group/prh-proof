@@ -1,0 +1,6 @@
+sigma,cider,matched,source
+0.5,0.225,2.86,decoder job 1034619 (pruned checkpoint; value from figs/captions_n0.5)
+1.0,0.304,2.86,decoder job 1034620 (pruned checkpoint; value from figs/captions_n1.0)
+2.0,0.368,2.86,decoder job 1034621
+3.0,0.396,2.86,decoder job 1036377 (figs/captions_n3.0)
+4.0,0.377,2.86,decoder job 1037115 (pruned checkpoint; value from figs/captions_n4.0)
