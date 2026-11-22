@@ -4,6 +4,7 @@ Image encoders come from stable-pretraining (``LeJEPA``'s ViT) or timm (frozen D
 """
 
 import functools
+import os
 import re
 from pathlib import Path
 
@@ -13,7 +14,9 @@ from stable_pretraining.backbone.utils import from_huggingface
 from torch import nn
 from transformers import AutoTokenizer
 
-TOKENIZER = "bert-base-uncased"
+#: the text JEPAs' tokenizer; ``$PRH_TOKENIZER`` may name another with as many pieces (30,522), e.g. a WordPiece trained
+#: on a corpus in another script. Unset, every run is as before.
+TOKENIZER = os.environ.get("PRH_TOKENIZER", "bert-base-uncased")
 #: width, attention heads and layers of the text encoder; widths match ViT-{T,S,B,L}/16.
 ARCH = {"tiny": (192, 3, 12), "small": (384, 6, 12), "base": (768, 12, 12), "large": (1024, 16, 24)}
 
@@ -56,7 +59,7 @@ class TextEncoder(nn.Module):
         super().__init__()
         width, heads, layers = ARCH[arch]
         self.bert = from_huggingface(
-            TOKENIZER,
+            "bert-base-uncased",  # the configuration (vocabulary size 30,522); the tokens come from TOKENIZER
             pretrained=False,
             hidden_size=width,
             num_hidden_layers=layers,
@@ -100,11 +103,15 @@ class TextEncoder(nn.Module):
 
 
 class _Conditioned(nn.Module):
-    """Conditioning shared by the caption decoders: the frozen text-JEPA embedding, centred and unit-norm."""
+    """Conditioning shared by the caption decoders: the frozen text-JEPA embedding, centred and unit-norm.
 
-    def __init__(self, cond_dim: int):
+    With ``n_slots > 1`` (opt-in) the conditioning is ``[N, n_slots, cond_dim]``, e.g. one embedding per region of an
+    input, each slot centred by its own mean.
+    """
+
+    def __init__(self, cond_dim: int, n_slots: int = 1):
         super().__init__()
-        self.register_buffer("mu", torch.zeros(cond_dim))
+        self.register_buffer("mu", torch.zeros(cond_dim) if n_slots == 1 else torch.zeros(n_slots, cond_dim))
 
     @torch.no_grad()
     def update_mean(self, z: torch.Tensor, momentum: float = 0.01) -> None:
@@ -119,7 +126,7 @@ class _Conditioned(nn.Module):
         """
         c = F.normalize(z.float() - self.mu, dim=-1)
         if noise:
-            c = F.normalize(c + noise * torch.randn_like(c) / c.shape[1] ** 0.5, dim=-1)
+            c = F.normalize(c + noise * torch.randn_like(c) / c.shape[-1] ** 0.5, dim=-1)
         return c
 
 
@@ -218,10 +225,13 @@ class LMDecoder(_Conditioned):
         cond_dim: width of the conditioning embedding (the text JEPA's).
         n_prefix: number of prefix embeddings.
         pretrained: start from the language model's weights (``False``: its architecture only, to load a checkpoint).
+        n_slots: opt-in, several conditioning embeddings per row (``[N, n_slots, cond_dim]``, e.g. a grid of regions):
+            each slot goes through the same prefix MLP, plus a learned embedding of its slot, and the soft prompt is
+            the slots' ``n_slots * n_prefix`` embeddings in order.
     """
 
-    def __init__(self, lm: str, cond_dim: int, n_prefix: int = 10, pretrained: bool = True):
-        super().__init__(cond_dim)
+    def __init__(self, lm: str, cond_dim: int, n_prefix: int = 10, pretrained: bool = True, n_slots: int = 1):
+        super().__init__(cond_dim, n_slots)
         from transformers import AutoConfig, AutoModelForCausalLM
 
         if pretrained:
@@ -231,39 +241,87 @@ class LMDecoder(_Conditioned):
         self.tok, width = tokenizer(lm), self.lm.config.hidden_size
         self.prefix = nn.Sequential(nn.Linear(cond_dim, width), nn.GELU(), nn.Linear(width, n_prefix * width))
         self.n_prefix, self.config = n_prefix, {"lm": lm, "cond_dim": cond_dim, "n_prefix": n_prefix}
+        if n_slots > 1:
+            self.slot = nn.Parameter(torch.zeros(n_slots, n_prefix, width))
+            self.config["n_slots"] = n_slots
 
     def _soft_prompt(self, c: torch.Tensor) -> torch.Tensor:
         embed = self.lm.get_input_embeddings().weight
+        if c.dim() == 3:  # slots: [N, S, d] -> [N, S * n_prefix, width]
+            x = self.prefix(c.to(embed.dtype)).view(len(c), c.shape[1], self.n_prefix, -1) + self.slot.to(embed.dtype)
+            return x.flatten(1, 2)
         return self.prefix(c.to(embed.dtype)).view(len(c), self.n_prefix, -1).to(embed.dtype)
 
-    def loss(self, c: torch.Tensor, tokens: torch.Tensor, captions: list[str] | None = None) -> torch.Tensor:
+    def _prompted(self, c: torch.Tensor, prompts: list[str], targets: list[str] | None = None):
+        """Soft prompt, then each row's text prompt (e.g. a question), then its target if given: input embeddings,
+        attention mask and labels (the target's tokens only), right-padded (left-padded without targets, to generate)."""
+        p = self.tok(list(prompts), add_special_tokens=False)["input_ids"]
+        a = self.tok([s + self.tok.eos_token for s in targets], add_special_tokens=False)["input_ids"] if targets else [[] for _ in p]
+        seqs = [(q + t)[:128] for q, t in zip(p, a)]
+        lab = [([-100] * len(q) + t)[:128] for q, t in zip(p, a)]
+        n, pad = max(map(len, seqs)), self.tok.pad_token_id
+        left = not targets
+        ids = torch.tensor([[pad] * (n - len(s)) * left + s + [pad] * (n - len(s)) * (not left) for s in seqs], device=c.device)
+        mask = torch.tensor([[0] * (n - len(s)) * left + [1] * len(s) + [0] * (n - len(s)) * (not left) for s in seqs], device=c.device)
+        soft = self._soft_prompt(c)
+        emb = self.lm.get_input_embeddings()(ids)
+        ones = mask.new_ones(len(c), soft.shape[1])
+        if left:  # [pads] [soft prompt] [prompt]: the pads move before the soft prompt
+            k = (mask == 0).sum(1)
+            x = torch.stack([torch.cat([emb[i, : k[i]], soft[i], emb[i, k[i] :]]) for i in range(len(c))])
+            m = torch.stack([torch.cat([mask[i, : k[i]], ones[i], mask[i, k[i] :]]) for i in range(len(c))])
+            return x, m, None
+        labels = torch.tensor([s + [-100] * (n - len(s)) for s in lab], device=c.device)
+        return torch.cat([soft, emb], 1), torch.cat([ones, mask], 1), torch.cat([torch.full_like(ones, -100), labels], 1)
+
+    def loss(
+        self, c: torch.Tensor, tokens: torch.Tensor, captions: list[str] | None = None, prompts: list[str] | None = None
+    ) -> torch.Tensor:
         """Cross-entropy of the caption and of its end, given ``c``.
 
-        The target is ``captions`` as written if given, else the text of the encoder's token ids (lower-cased).
+        The target is ``captions`` as written if given, else the text of the encoder's token ids (lower-cased). With
+        ``prompts`` (e.g. questions, the targets then being their answers), each row reads its prompt after the soft
+        prompt, and only the target is scored.
         """
         texts = list(captions) if captions is not None else tokenizer().batch_decode(tokens, skip_special_tokens=True)
+        if prompts is not None:
+            x, mask, labels = self._prompted(c, prompts, texts)
+            return self.lm(inputs_embeds=x, attention_mask=mask, labels=labels).loss
         t = self.tok([s + self.tok.eos_token for s in texts], return_tensors="pt", padding=True, truncation=True, max_length=64)
         t = t.to(c.device)  # a few captions are paragraphs: their target stops after 64 tokens, like the encoder's view
-        x = torch.cat([self._soft_prompt(c), self.lm.get_input_embeddings()(t.input_ids)], 1)
-        mask = torch.cat([t.attention_mask.new_ones(len(c), self.n_prefix), t.attention_mask], 1)
+        soft = self._soft_prompt(c)
+        x = torch.cat([soft, self.lm.get_input_embeddings()(t.input_ids)], 1)
+        mask = torch.cat([t.attention_mask.new_ones(len(c), soft.shape[1]), t.attention_mask], 1)
         labels = torch.cat(
-            [torch.full_like(mask[:, : self.n_prefix], -100), t.input_ids.masked_fill(t.attention_mask == 0, -100)], 1
+            [torch.full_like(mask[:, : soft.shape[1]], -100), t.input_ids.masked_fill(t.attention_mask == 0, -100)], 1
         )
         return self.lm(inputs_embeds=x, attention_mask=mask, labels=labels).loss
 
     @torch.no_grad()
     def generate(
-        self, c: torch.Tensor, max_len: int = 32, beam: int = 1, nbest: int = 1, samples: int = 0, temperature: float = 0.7
+        self,
+        c: torch.Tensor,
+        max_len: int = 32,
+        beam: int = 1,
+        nbest: int = 1,
+        samples: int = 0,
+        temperature: float = 0.7,
+        prompts: list[str] | None = None,
     ) -> list[str]:
         """Beam search (greedy for ``beam=1``) from the soft prompt of each row of ``c``: ``N * nbest`` captions, row by row.
 
         With ``samples``, each row's ``nbest`` beams are followed by that many nucleus samples (top-p 0.95), e.g. the
-        candidates of :func:`prh.metrics.consensus`.
+        candidates of :func:`prh.metrics.consensus`. With ``prompts``, each row continues its own prompt (e.g. a
+        question) after the soft prompt.
         """
-        x = self._soft_prompt(c)
+        if prompts is not None:
+            x, mask, _ = self._prompted(c, prompts)
+        else:
+            x = self._soft_prompt(c)
+            mask = torch.ones(x.shape[:2], dtype=torch.long, device=x.device)
         kw = dict(
             inputs_embeds=x,
-            attention_mask=torch.ones(x.shape[:2], dtype=torch.long, device=x.device),
+            attention_mask=mask,
             max_new_tokens=max_len,
             eos_token_id=self.tok.eos_token_id,
             pad_token_id=self.tok.pad_token_id,
@@ -282,7 +340,8 @@ class LMDecoder(_Conditioned):
         ckpt = ckpt or _checkpoint(path)
         sd = _state(path, "decoder.", ckpt)
         out, width = sd["prefix.2.weight"].shape
-        return build_decoder({"lm": ckpt["hyper_parameters"]["lm"], "cond_dim": sd["mu"].shape[0], "n_prefix": out // width}, sd)
+        config = {"lm": ckpt["hyper_parameters"]["lm"], "cond_dim": sd["mu"].shape[-1], "n_prefix": out // width}
+        return build_decoder(config | ({"n_slots": sd["mu"].shape[0]} if sd["mu"].dim() == 2 else {}), sd)
 
 
 def build_decoder(config: dict, state: dict[str, torch.Tensor]) -> CaptionDecoder | LMDecoder:

@@ -5,11 +5,13 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pandas as pd
 import pytest
 import torch
 
 import train
 from prh.features import load_embeddings
+from prh.models import load_decoder
 
 REPO = Path(__file__).resolve().parents[1]
 
@@ -65,6 +67,25 @@ def test_resume_continues_a_run_in_a_new_run_dir(roots):
     assert torch.allclose(after[1][0], before[1][0], atol=1e-5) and not torch.allclose(after[3][0], before[1][0])
 
 
+@pytest.mark.slow
+def test_supervised_decoder_trains_on_precomputed_features_and_keeps_every_epoch(roots):
+    pd.DataFrame({"captions": [[f"photo {i} caption {j}" for j in range(5)] for i in range(10)]}).to_parquet(roots / "p.parquet")
+    torch.save(torch.randn(10, 24), roots / "p.pt")
+    features = ["--features", str(roots / "p.pt"), "--data", f"{roots / 'p.parquet'}:6"]
+    run = _train(roots, "--modality", "text", "--objective", "decode", *features, "--noise", "0", "--keep-epochs")
+    kept = sorted((run / "checkpoints").glob("epoch=*.ckpt"))
+    assert [p.name.split("-")[0] for p in kept] == ["epoch=0", "epoch=1"]  # 30 captions, batches of 4: 7 steps each
+    assert "optimizer_states" not in torch.load(kept[0], map_location="cpu", weights_only=False)  # weights only
+    dec = load_decoder(kept[1])
+    assert dec.mu.shape == (24,) and dec.mu.abs().sum() > 0
+    assert not list(run.rglob("validation_epoch=*.pt"))  # nothing validates in the loop
+
+
+def test_features_replace_the_encoder_of_a_decoder():
+    args = train.parse_args(["--modality", "text", "--objective", "decode", "--features", "x.pt", "--data", "p.parquet:3"])
+    assert args.encoder is None and args.features == Path("x.pt") and not args.keep_epochs
+
+
 @pytest.mark.parametrize(
     "argv",
     [
@@ -74,8 +95,22 @@ def test_resume_continues_a_run_in_a_new_run_dir(roots):
         ["--modality", "text", "--objective", "decode"],
         ["--modality", "text", "--encoder", "x.ckpt"],
         ["--modality", "text", "--lm", "Qwen/Qwen2.5-0.5B"],
+        ["--modality", "text", "--objective", "decode", "--encoder", "x.ckpt", "--features", "x.pt"],
+        ["--modality", "text", "--features", "x.pt"],
     ],
 )
 def test_inconsistent_arguments_are_rejected(argv):
     with pytest.raises(SystemExit):
         train.parse_args(argv)
+
+
+def test_init_decoder_carries_the_language_model_over_to_another_conditioning_width():
+    from prh.models import CaptionDecoder
+
+    text, image = CaptionDecoder(0, 32, arch="tiny"), CaptionDecoder(0, 48, arch="tiny")
+    with pytest.raises(RuntimeError):  # without partial, a width mismatch is an error, as before
+        train.init_decoder(image, text.state_dict())
+    loaded = train.init_decoder(image, text.state_dict(), partial=True)
+    assert "prefix.weight" not in loaded and "mu" not in loaded  # the input map and the mean have the new width
+    assert all(torch.equal(image.state_dict()[k], text.state_dict()[k]) for k in loaded)
+    assert any(k.startswith("decoder.") for k in loaded)  # the decoder itself carries over

@@ -142,7 +142,7 @@ def test_unbiased_cka_matches_the_u_statistic_and_its_invariances():
 
     K, L = a @ a.T, b @ b.T
     reference = hsic_u(K, L) / (hsic_u(K, K) * hsic_u(L, L)) ** 0.5
-    assert unbiased_cka(a, b) == pytest.approx(reference, abs=1e-10)
+    assert unbiased_cka(a, b) == pytest.approx(float(reference), abs=1e-10)
     x = torch.randn(300, 16, generator=g)
     q = torch.linalg.qr(torch.randn(16, 16, generator=g))[0]
     assert unbiased_cka(x, 3.0 * x @ q) == pytest.approx(1.0, abs=1e-6)

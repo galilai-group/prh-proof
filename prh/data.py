@@ -222,6 +222,33 @@ class Captions(torch.utils.data.Dataset):
         return (self.texts[i].as_py(),)
 
 
+class PairedCaptions(torch.utils.data.Dataset):
+    """Every caption of the first ``k`` pairs of a table, each with its pair's precomputed features.
+
+    The training data of a supervised caption decoder (``train.py --objective decode --features``). ``spec`` is
+    ``<parquet>:<k>``, a table with a ``captions`` column (a list per row) read in a seed-0 shuffled order
+    (``sample(frac=1, random_state=0)``); ``features`` is a ``[rows, d]`` tensor file holding every row of the table in
+    that order (e.g. the frozen image features of the pairs). Items are ``(caption, features)``.
+    """
+
+    def __init__(self, spec, features):
+        path, _, k = spec.rpartition(":")
+        df = pd.read_parquet(path, columns=["captions"])
+        x = torch.load(features, map_location="cpu", mmap=True)
+        if len(x) != len(df) or int(k) < 1:
+            raise ValueError(f"{features} has {len(x)} rows for the {len(df)} of {path}; or k = {k} < 1")
+        df = df.sample(frac=1, random_state=0).head(int(k))
+        self.x = x[: len(df)].float().clone()  # only these rows are read from the file
+        self.captions = [c.strip() for caps in df.captions for c in caps]
+        self.row = [i for i, caps in enumerate(df.captions) for _ in caps]
+
+    def __len__(self):
+        return len(self.captions)
+
+    def __getitem__(self, i):
+        return self.captions[i], self.x[self.row[i]]
+
+
 def _index_shard(path):
     """Byte offsets of each sample's jpg and json in a tar shard, from the headers only."""
     members = {}

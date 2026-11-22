@@ -12,6 +12,8 @@ the views and the objective. No arm ever sees the other modality; pairs are used
     python train.py --modality text --caption-views --data recaptext:50 --epoch-size 1000000   # web-scale text
     python train.py --modality text --objective decode --encoder <ckpt>   # caption decoder on a frozen text JEPA
     python train.py --modality text --objective decode --encoder <ckpt> --lm Qwen/Qwen2.5-1.5B --lr 3e-5   # same, LLM decoder
+    python train.py --modality text --objective decode --features <pairs.pt> --data <pairs.parquet>:<k> --lm <name> \
+        --noise 0 --keep-epochs   # supervised decoder: on precomputed features of k pairs (e.g. their images'), no encoder
 
 Every run validates on the val and test pairs of Flickr30k (or MSR-VTT, ``--val msrvtt``), whatever it trains on. ``docs/reproduce.md`` lists the
 exact command of every result in the paper.
@@ -40,7 +42,8 @@ def parse_args(argv=None):
         "--objective",
         choices=["lejepa", "ntp", "decode"],
         default="lejepa",
-        help="ntp: next-token prediction; decode: caption decoder on a frozen text JEPA (--encoder)",
+        help="ntp: next-token prediction; decode: caption decoder on a frozen text JEPA (--encoder) or on the precomputed "
+        "features of pairs (--features)",
     )
     p.add_argument(
         "--good-views",
@@ -66,12 +69,22 @@ def parse_args(argv=None):
     p.add_argument("--gscale", type=float, nargs=2, default=[0.5, 1.0], help="text: kept fraction of global views")
     p.add_argument("--lscale", type=float, nargs=2, default=[0.15, 0.5], help="text: kept fraction of local views")
     p.add_argument("--mask", type=float, default=0.15, help="text: masked fraction of view tokens")
+    p.add_argument("--distinct-views", action="store_true", help="text good views: captions drawn without repeats")
     p.add_argument("--max-len", type=int, default=64, help="text: tokens per training view")
     p.add_argument("--encoder", type=Path, help="decode: checkpoint of the frozen text JEPA")
+    p.add_argument(
+        "--features",
+        type=Path,
+        help="decode, instead of --encoder: a [rows, d] tensor of features of the pairs of --data <parquet>:<k> (every "
+        "row, in a seed-0 shuffled order; prh.data.PairedCaptions); the decoder reads them, nothing validates in the loop",
+    )
     p.add_argument("--noise", type=float, default=1.0, help="decode: relative noise on the conditioning embedding")
     p.add_argument("--lm", help="decode: fine-tune this pretrained causal language model (HuggingFace name) as the decoder")
     p.add_argument("--init", type=Path, help="decode: start from the decoder of this decode run's checkpoint")
+    p.add_argument("--freeze-embeddings", action="store_true",
+                   help="decode with --lm: keep the language model's input and output embeddings frozen (an 8B model's Adam states then fit on one GPU)")
     p.add_argument("--resume", type=Path, help="continue from this checkpoint's full state in a new run (e.g. another queue)")
+    p.add_argument("--keep-epochs", action="store_true", help="also keep the weights of every epoch (epoch=<e>-step=<s>.ckpt)")
     p.add_argument("--epochs", type=int, default=200)
     p.add_argument("--epoch-size", type=int, default=0, help="samples per epoch, drawn at random (0: the whole dataset)")
     p.add_argument("--steps", type=int, default=-1, help="cap on optimizer steps (smoke tests)")
@@ -95,8 +108,9 @@ def parse_args(argv=None):
         p.error("--good-views takes a fraction in [0, 1]")
     if args.objective != "lejepa" and args.modality != "text":
         p.error(f"--objective {args.objective} is text only")
-    if (args.objective == "decode") != (args.encoder is not None) or ((args.lm or args.init) and args.objective != "decode"):
-        p.error("--encoder (and optionally --lm, --init) go with --objective decode, and only with it")
+    decode = args.objective == "decode"
+    if decode != ((args.encoder is None) != (args.features is None)) or ((args.lm or args.init or args.features) and not decode):
+        p.error("--encoder or --features (one of them; optionally --lm, --init) go with --objective decode, and only with it")
     return args
 
 
@@ -108,9 +122,8 @@ def _shard():
 
 def build_data(args, tok):
     """Training set of ``--data`` and the Flickr30k val+test pairs, with the arm's views."""
-    train_tf, val_tf, gpu_tf = view_transforms(
-        args.modality, tok, args.objective, args.caption_views, args.views, args.gscale, args.lscale, args.mask, args.max_len
-    )
+    views = (args.views, args.gscale, args.lscale, args.mask, args.max_len, args.distinct_views)
+    train_tf, val_tf, gpu_tf = view_transforms(args.modality, tok, args.objective, args.caption_views, *views)
 
     def loader(ds, train):
         sampler = prh_data.EpochSampler(len(ds), args.epoch_size) if train and args.epoch_size else None
@@ -125,8 +138,12 @@ def build_data(args, tok):
             persistent_workers=args.workers > 0,
         )
 
-    if args.objective == "decode":  # captions as written: the language model's targets keep their case
-        train = spt.data.FromTorchDataset(prh_data.Captions(args.data), ["caption"], transform=train_tf)
+    if args.objective == "decode" and args.features:  # each caption with its pair's features (e.g. of its image)
+        ds = prh_data.PairedCaptions(args.data, args.features)  # a dataset may name more fields (question, answer)
+        train = spt.data.FromTorchDataset(ds, getattr(ds, "fields", ["caption", "features"]), transform=train_tf)
+    elif args.objective == "decode":  # captions as written: the language model's targets keep their case
+        ds = prh_data.Captions(args.data)  # a dataset may name more fields than the caption (e.g. question, answer)
+        train = spt.data.FromTorchDataset(ds, getattr(ds, "fields", ["caption"]), transform=train_tf)
     elif args.data == "imagenet":  # labels are carried along but never used
         train = spt.data.HFDataset(str(prh_data.IMAGENET / "train"), transform=train_tf, gpu_transform=gpu_tf)
     else:
@@ -143,16 +160,40 @@ def build_data(args, tok):
     return spt.data.DataModule(train=loader(train, True), val=loader(val, False))
 
 
+def init_decoder(dec, state, partial=False):
+    """Load a trained decoder's ``state`` into ``dec``; ``partial``: only the tensors whose name and shape match.
+
+    With ``--features`` the conditioning width differs from the text JEPA's the decoder was trained on: the language
+    model and the prefix's output layer carry over, the prefix's input layer and the conditioning mean start anew.
+    """
+    if partial:
+        own = dec.state_dict()
+        state = {k: v for k, v in state.items() if k in own and own[k].shape == v.shape}
+    dec.load_state_dict(state, strict=not partial)
+    return sorted(state)
+
+
 def build_networks(args, tok):
     """``(networks, forward function, embedding width)`` of the arm."""
     if args.objective == "ntp":
         return {"backbone": TextEncoder(tok.pad_token_id, causal=True, arch=args.arch)}, forward.next_token, ARCH[args.arch][0]
     if args.objective == "decode":  # --arch sizes the decoder; the frozen encoder's size comes from its checkpoint
-        enc = TextEncoder.from_checkpoint(args.encoder, tok.pad_token_id)
-        dec = LMDecoder(args.lm, enc.embed_dim) if args.lm else CaptionDecoder(tok.pad_token_id, enc.embed_dim, args.arch)
+        slots = 1
+        if args.features:  # no encoder: the batches carry the conditioning features (prh.data.PairedCaptions)
+            shape = torch.load(args.features, map_location="cpu", mmap=True).shape  # [rows, d] or [rows, slots, d]
+            enc, dim, slots = None, shape[-1], shape[1] if len(shape) == 3 else 1
+        else:
+            enc = TextEncoder.from_checkpoint(args.encoder, tok.pad_token_id)
+            dim = enc.embed_dim
+        dec = LMDecoder(args.lm, dim, n_slots=slots) if args.lm else CaptionDecoder(tok.pad_token_id, dim, args.arch)
         if args.init:  # e.g. fine-tune a decoder pretrained on web sentences on human captions
-            dec.load_state_dict(load_decoder(args.init).state_dict())
-        return {"decoder": dec, "encoder": EvalOnly(enc), "noise": args.noise}, forward.decode, enc.embed_dim
+            init_decoder(dec, load_decoder(args.init).state_dict(), partial=args.features is not None)
+        if args.freeze_embeddings and args.lm:  # opt-in: the soft prompt and the transformer body still train
+            dec.lm.get_input_embeddings().requires_grad_(False)
+            dec.lm.get_output_embeddings().requires_grad_(False)
+        if enc is None:
+            return {"decoder": dec, "noise": args.noise}, forward.decode, dim
+        return {"decoder": dec, "encoder": EvalOnly(enc), "noise": args.noise}, forward.decode, dim
     model = LeJEPA(f"vit_{args.arch}_patch16_224", lamb=args.lamb)
     if args.modality == "text":
         model.backbone = TextEncoder(tok.pad_token_id, arch=args.arch)
@@ -162,7 +203,10 @@ def build_networks(args, tok):
 def main(argv=None):
     args = parse_args(argv)
     # Spot jobs are preempted every few minutes: also save last.ckpt mid-epoch.
-    spt.set(cache_dir=str(args.cache_dir.resolve()), requeue_checkpoint_every_n_steps=250)
+    # An LLM decoder's checkpoint (fp32 weights + Adam) is ~90 GB for 7B: every 250 steps it spends most of its time
+    # saving, so it checkpoints every 2,000 (PRH_CKPT_EVERY overrides either).
+    every = int(os.environ.get("PRH_CKPT_EVERY", 2000 if args.objective == "decode" and args.lm else 250))
+    spt.set(cache_dir=str(args.cache_dir.resolve()), requeue_checkpoint_every_n_steps=every)
     spt.make_it_fast()
     torch.backends.cuda.enable_cudnn_sdp(False)  # some cluster nodes cannot build cuDNN SDPA plans
     tok = AutoTokenizer.from_pretrained(TOKENIZER)
@@ -194,6 +238,9 @@ def main(argv=None):
             "interval": "step",
         },
     )
+    # --keep-epochs: Lightning's checkpoint callback, which stable-pretraining's Manager puts in the run's checkpoints/
+    keep = {"_target_": "lightning.pytorch.callbacks.ModelCheckpoint", "save_top_k": -1, "every_n_epochs": 1}
+    keep |= {"save_on_train_epoch_end": True, "save_weights_only": True}  # the weights of every epoch, whatever validates
     # A config dict (not a pl.Trainer) lets Manager set default_root_dir to the run dir, so that
     # OnlineWriter's relative path is per run.
     trainer = {
@@ -208,6 +255,8 @@ def main(argv=None):
         "num_sanity_val_steps": -1,
         "precision": "bf16-mixed" if torch.cuda.is_available() else "32",
         **({"gradient_clip_val": args.clip} if args.clip > 0 else {}),
+        # --features: the validation pairs carry no features; the epoch is picked afterwards (--keep-epochs)
+        **({"limit_val_batches": 0} if args.features else {}),
         "callbacks": [
             {
                 "_target_": "stable_pretraining.callbacks.OnlineWriter",
@@ -224,6 +273,7 @@ def main(argv=None):
                 "queue_length": 2048,
                 "target_shape": emb_dim,
             },
+            *([keep] if args.keep_epochs else []),
         ],
     }
     resume = {"ckpt_path": str(args.resume.resolve()), "weights_only": False} if args.resume else {}

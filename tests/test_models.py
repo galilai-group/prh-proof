@@ -202,3 +202,51 @@ def test_lm_decoder_learns_the_written_case_when_given_captions(tok, tiny_lm):
         dec.loss(c, ids, ["A dog in Paris"]).backward()
         opt.step()
     assert dec.eval().generate(c, max_len=8) == ["A dog in Paris"]
+
+
+def test_lm_decoder_answers_the_question_it_reads_after_the_soft_prompt(tok, tiny_lm):
+    """With prompts (questions), only the answer is scored, and generation continues each row's own question: two
+    rows with one embedding each and questions of different lengths, generated together and one by one."""
+    dec = LMDecoder(tiny_lm, cond_dim=16, n_prefix=2)
+    c = torch.nn.functional.normalize(torch.randn(2, 16), dim=1)
+    c = torch.cat([c, c])
+    qs = ["Question: what animal is it? Answer:", "Question: how many? Answer:", "Question: is it sunny today? Answer:",
+          "Question: what color is the large car? Answer:"]  # fmt: skip
+    ans = ["a dog", "two", "yes", "red"]
+    ids = tok(["x"] * 4, return_tensors="pt")["input_ids"]
+    opt = torch.optim.Adam(dec.parameters(), lr=3e-3)
+    for _ in range(150):
+        opt.zero_grad()
+        dec.loss(c, ids, ans, prompts=qs).backward()
+        opt.step()
+    dec.eval()
+    together = dec.generate(c, max_len=4, prompts=qs)
+    alone = [dec.generate(c[i : i + 1], max_len=4, prompts=qs[i : i + 1])[0] for i in range(4)]
+    assert together == alone == ["A dog", "Two", "Yes", "Red"]
+    x, mask, labels = dec._prompted(c[:1], qs[:1], ans[:1])  # the question is context, never a target
+    n_q = len(dec.tok(qs[0], add_special_tokens=False)["input_ids"])
+    assert (labels[0, : 2 + n_q] == -100).all() and (labels[0, 2 + n_q :] != -100).all()
+
+
+def test_lm_decoder_slots_read_each_region_and_roundtrip(tok, tiny_lm, tmp_path):
+    """n_slots: a row is several embeddings (e.g. regions); swapping two slots changes the answer, so their order is
+    read; the checkpoint keeps the slots; one slot behaves as before."""
+    dec = LMDecoder(tiny_lm, cond_dim=8, n_prefix=2, n_slots=3)
+    a, b = torch.nn.functional.normalize(torch.randn(2, 8), dim=1)
+    c = torch.stack([torch.stack([a, b, b]), torch.stack([b, a, b])])  # the odd region first, then second
+    qs = ["Question: where is it? Answer:"] * 2
+    ids = tok(["x"] * 2, return_tensors="pt")["input_ids"]
+    opt = torch.optim.Adam(dec.parameters(), lr=3e-3)
+    for _ in range(150):
+        opt.zero_grad()
+        dec.loss(c, ids, ["left", "middle"], prompts=qs).backward()
+        opt.step()
+    dec.eval()
+    assert dec.generate(c, max_len=3, prompts=qs) == ["Left", "Middle"]
+    assert dec.condition(c).shape == (2, 3, 8) and dec._soft_prompt(dec.condition(c)).shape[1] == 6
+    dec.mu.normal_()
+    torch.save({"state_dict": {"decoder." + k: v for k, v in dec.state_dict().items()}, "hyper_parameters": {"lm": tiny_lm}},
+               tmp_path / "last.ckpt")  # fmt: skip
+    loaded = load_decoder(tmp_path / "last.ckpt")
+    assert loaded.config["n_slots"] == 3 and loaded.mu.shape == (3, 8)
+    assert loaded.generate(c, max_len=3, prompts=qs) == dec.generate(c, max_len=3, prompts=qs)

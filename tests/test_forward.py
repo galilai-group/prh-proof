@@ -63,3 +63,14 @@ def test_decoder_trains_on_noised_frozen_embeddings(tok):
         torch.allclose(v1["embedding"].norm(dim=1), torch.ones(6))
         and F.cosine_similarity(a["embedding"], v1["embedding"]).mean() < 0.5
     )
+
+
+def test_decoder_reads_the_features_of_the_batch_without_an_encoder(tok):
+    dec = CaptionDecoder(tok.pad_token_id, 32, arch="tiny")
+    module = spt.Module(decoder=dec, noise=0.0, key="text", forward=forward.decode, hparams={})
+    batch = _val_batch(tok) | {"features": torch.randn(6, 32) + 3}
+    out = module(batch, "fit")
+    assert dec.mu.abs().sum() > 0  # the running mean moved
+    assert torch.allclose(out["embedding"], dec.condition(batch["features"]))  # noise 0: the clean conditioning
+    out["loss"].backward()
+    assert dec.prefix.weight.grad.abs().sum() > 0

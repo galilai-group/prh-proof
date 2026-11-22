@@ -124,7 +124,7 @@ def wit_embed(args):
     if is_image_model(args.model):
         feats = features.embed_images(args.model, images, layers=True)
     else:
-        feats = features.embed_texts(args.model, texts, layers=True)
+        feats = features.embed_texts(args.model, texts, layers=True, pool=args.pool)
     BENCH[args.bench].mkdir(parents=True, exist_ok=True)
     torch.save(feats, BENCH[args.bench] / f"{args.name or args.model}.pt")
     print(args.name or args.model, len(feats), "layers", tuple(feats[-1].shape))
@@ -244,8 +244,9 @@ def report(args):
     """A text checkpoint's numbers in the paper's tables, written to ``<results>/<name>.txt`` (read by ``tables.py``).
 
     Flickr test pairs through one rotation fitted on the ~30k train and val pairs (``align``), and the PRH score on
-    WIT-1024 with DINOv2 ViT-S/B/L/g (``wit``). Needs ``embed dinov2 runs/ref/flickr_dinov2_all --pairs flickr-all``
-    and ``wit-embed dinov2[-s|-l|-g]`` once beforehand.
+    WIT-1024 with DINOv2 ViT-S/B/L/g (``wit``); with ``--cls``, again with each layer's ``[CLS]`` token (the embedding
+    the JEPA trains, as DINOv2's CLS token) in place of the token mean (lines ``text-<name>-cls``, after the others). Needs
+    ``embed dinov2 runs/ref/flickr_dinov2_all --pairs flickr-all`` and ``wit-embed dinov2[-s|-l|-g]`` once beforehand.
     """
 
     def run(*argv):  # one subcommand, parsed as on the command line
@@ -257,6 +258,9 @@ def report(args):
     flickr = run("align", str(ref / "flickr_dinov2_all"), str(ref / f"all_{name}"))
     run("wit-embed", str(args.ckpt), "--name", f"text-{name}")
     lines = run("wit", *[f"{m}:text-{name}" for m in ("dinov2-s", "dinov2", "dinov2-l", "dinov2-g")])
+    if args.cls:
+        run("wit-embed", str(args.ckpt), "--name", f"text-{name}-cls", "--pool", "first")
+        lines += run("wit", *[f"{m}:text-{name}-cls" for m in ("dinov2-s", "dinov2", "dinov2-l", "dinov2-g")])
     out = Path(args.results) / f"{name}.txt"
     out.parent.mkdir(parents=True, exist_ok=True)
     row = flickr.tail(1).to_string(header=False, index=False, float_format="%.4f")
@@ -509,6 +513,7 @@ def parser():
     s.add_argument("model")
     s.add_argument("--name", help="cache name (required for checkpoints)")
     s.add_argument("--bench", choices=list(BENCH), default="wit", help="WIT-1024 pairs or the 5,000 COCO test pairs")
+    s.add_argument("--pool", choices=["mean", "first", "last"], default="mean", help="texts: token mean, first or last")
     s.set_defaults(fn=wit_embed)
     s = sub.add_parser("wit", help=wit.__doc__)
     s.add_argument("pairs", nargs="+", help="name_a:name_b")
@@ -533,6 +538,7 @@ def parser():
     s.add_argument("ckpt", type=Path, help="a text JEPA's checkpoint")
     s.add_argument("--name", required=True, help="the run's name in the results folder and in paper/runs.csv")
     s.add_argument("--results", default="runs/results", help="folder of result files read by tables.py")
+    s.add_argument("--cls", action="store_true", help="also read each layer's [CLS] token (lines text-<name>-cls)")
     s.set_defaults(fn=report)
     results = Path("runs/results/pairfree")
     s = sub.add_parser("pairfree-embed", help=pairfree_embed.__doc__)

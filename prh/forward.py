@@ -47,14 +47,24 @@ def decode(self, batch, stage):
     """Caption decoder on a frozen text JEPA: rebuild each caption from its own (noised) embedding.
 
     Training noise of relative scale ``self.noise`` makes the decoder tolerate the residual of the cross-modal
-    rotation it will be applied through (as in CapDec, Nukrai et al. 2022).
+    rotation it will be applied through (as in CapDec, Nukrai et al. 2022). A batch that carries ``features``
+    (``train.py --features``: precomputed features of each caption's pair, e.g. its image's) conditions the decoder on
+    them instead, without an encoder: a supervised captioner.
     """
     tokens = batch[self.key]
-    with torch.no_grad():
-        z = self.encoder(tokens).float()
+    if "features" in batch:
+        z = batch["features"].float()
+    else:
+        with torch.no_grad():
+            z = self.encoder(tokens).float()
     if stage == "fit":
         self.decoder.update_mean(z)
     c = self.decoder.condition(z, self.noise if stage == "fit" else 0.0)
-    loss = self.decoder.loss(c, tokens, batch.get("caption"))  # validation batches carry token ids only
+    if "question" in batch:  # question answering on text (prh-views train.py qa:<table>): the answer, given the question
+        loss = self.decoder.loss(c, tokens, batch["answer"], prompts=batch["question"])
+    else:
+        loss = self.decoder.loss(c, tokens, batch.get("caption"))  # validation batches carry token ids only
     self.log(f"{stage}/loss", loss)
+    if c.dim() == 3:  # slots ([N, S, d], LMDecoder n_slots): callbacks' queues hold one vector per row, the slots' mean
+        c = c.mean(1)
     return {"loss": loss, "embedding": c} if stage == "fit" else {"loss": loss, **_eval_outputs(batch, c, c)}

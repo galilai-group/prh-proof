@@ -22,7 +22,7 @@ from pathlib import Path
 
 import torch
 from PIL import Image
-from transformers import AutoModel, AutoTokenizer
+from transformers import AutoConfig, AutoModel, AutoTokenizer
 
 from .models import TOKENIZER, TextEncoder, arch_of_width
 from .views import TextView, image_eval_view
@@ -62,6 +62,7 @@ TEXT_MODELS = {
     "llama3-70b": "meta-llama/Meta-Llama-3-70B",
     "bert": "bert-base-uncased",
     "mpnet": "sentence-transformers/all-mpnet-base-v2",  # contrastive sentence encoder, 1B sentence pairs
+    "gte-base": "thenlper/gte-base",  # contrastive sentence encoder (mean pooling), MTEB-strong at its size
     "clip": "openai/clip-vit-base-patch32",  # text tower, trained jointly with images
 }
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
@@ -220,7 +221,10 @@ def _text_net(model, layers, last_token=False):
     dtype = torch.bfloat16 if re.search(r"\d+b$", model) and not model.endswith(("0.5b", "1.5b")) else torch.float32
     big = re.search(r"(1[4-9]|[2-9]\d)b$", model) is not None  # 14B and up: split across the visible GPUs
     tok = AutoTokenizer.from_pretrained(name)
-    net = AutoModel.from_pretrained(name, dtype=dtype, **({"device_map": "auto"} if big else {})).eval()
+    quant = getattr(AutoConfig.from_pretrained(name), "quantization_config", None)
+    static = isinstance(quant, dict) and quant.get("activation_scheme") == "static"  # FP8 (Mistral Small 4): no grouped_mm
+    eager = {"experts_implementation": "eager"} if static else {}
+    net = AutoModel.from_pretrained(name, dtype=dtype, **({"device_map": "auto"} if big else {}), **eager).eval()
     net = net if big else net.to(DEVICE)
     tok.pad_token = tok.pad_token or tok.eos_token  # Llama/Mistral have none; padding is masked out of the mean
 
@@ -233,8 +237,11 @@ def _text_net(model, layers, last_token=False):
             o = net.get_text_features(**t)  # recent transformers wrap the projected embedding in pooler_output
             return None, t["attention_mask"], o if torch.is_tensor(o) else o.pooler_output
         out = net(**t, output_hidden_states=layers)
+        hs = out.hidden_states
+        if layers and hasattr(net, "hc_head"):  # DeepSeek-V4: every layer carries hc_mult residual streams (mHC), read
+            hs = tuple(h if h.dim() == 3 else net.hc_head(h).to(h.device) for h in hs)  # through the model's own collapse
         return (
-            (out.hidden_states, t["attention_mask"], None)
+            (hs, t["attention_mask"], None)
             if layers
             else (None, t["attention_mask"], _mean(out.last_hidden_state, t["attention_mask"]))
         )
@@ -247,14 +254,27 @@ def _mean(h, mask):
     return (h.float() * m).sum(1) / m.sum(1)
 
 
+def _pool(h, mask, pool="mean"):
+    """The masked mean of hidden states ``h``, or the state of the first or the last unmasked token (``pool``)."""
+    if pool == "mean":
+        return _mean(h, mask)
+    m = mask.long()
+    i = m.argmax(1) if pool == "first" else m.shape[1] - 1 - m.flip(1).argmax(1)  # either padding side
+    return h[torch.arange(len(h)), i].float()
+
+
 @torch.no_grad()
-def embed_texts(model: str, texts: list[str], layers: bool = False, batch_size: int = 64, last_token: bool = False):
+def embed_texts(
+    model: str, texts: list[str], layers: bool = False, batch_size: int = 64, last_token: bool = False, pool: str = "mean"
+):
     """Embeddings ``[N, d]`` (or the masked mean of every hidden state if ``layers``) of a list of strings.
 
     ``last_token``: for our checkpoints, the last token's final hidden state instead of the model's own pooling.
+    ``pool``: with ``layers``, each hidden state's ``"first"`` or ``"last"`` token instead of the mean (our encoders:
+    ``[CLS]``, the token the JEPA is trained on, or ``[SEP]``).
     """
     net, out = _text_net(model, layers, last_token), []
     for chunk in _batches(texts, batch_size):
         hs, mask, emb = net(chunk)
-        out.append([_mean(h, mask).float().cpu() for h in hs] if layers else emb.float().cpu())
+        out.append([_pool(h, mask, pool).cpu() for h in hs] if layers else emb.float().cpu())
     return [torch.cat(layer) for layer in zip(*out)] if layers else torch.cat(out)

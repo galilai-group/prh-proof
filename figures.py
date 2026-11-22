@@ -203,8 +203,15 @@ def ablations(table, out):
         else:
             ax.scatter(0.01, y, marker="x", s=14, color=RED, lw=1)
         if (s.kind == "key").any():
-            ax.annotate(f"${100 * (ok.mean() / base - 1):+.0f}\\%$", (ok.max(), y), xytext=(4, 0), textcoords="offset points",
-                        va="center", color=INK, bbox=BACK)
+            ax.annotate(
+                f"${100 * (ok.mean() / base - 1):+.0f}\\%$",
+                (ok.max(), y),
+                xytext=(4, 0),
+                textcoords="offset points",
+                va="center",
+                color=INK,
+                bbox=BACK,
+            )
         if collapsed:
             label = "collapses" if not len(ok) else f"{collapsed} of {len(s)} collapse"
             x = ok.max() if len(ok) else 0.01

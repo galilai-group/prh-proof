@@ -39,6 +39,18 @@ def test_multiview_text_transform_gives_independent_views(tok):
     assert len({int(v["text"][1]) // 1000 for v in views}) > 1  # several captions among the views
 
 
+def test_distinct_views_read_every_caption_and_globals_differ(tok):
+    train, _, _ = view_transforms(
+        "text", tok, caption_views=True, views=(2, 6), gscale=(1, 1), lscale=(1, 1), mask=0, distinct=True
+    )
+    caps = [torch.arange(1000 * i, 1000 * i + 12) for i in range(1, 4)]
+    for _ in range(50):
+        first = [int(v["text"][1]) // 1000 for v in train({"text": list(caps)})["views"]]
+        assert first[0] != first[1] and set(first) == {1, 2, 3} and first == first[:3] * 2 + first[:2]
+    two = [[int(v["text"][1]) // 1000 for v in train({"text": caps[:2]})["views"]] for _ in range(50)]
+    assert all(f[0] != f[1] for f in two) and {f[0] for f in two} == {1, 2}  # random order, never the same pair
+
+
 def test_pair_view_concatenates_two_different_captions(tok):
     caps = [torch.arange(1000, 1005), torch.arange(2000, 2005), torch.arange(3000, 3005)]
     for _ in range(50):

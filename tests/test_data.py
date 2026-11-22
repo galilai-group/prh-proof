@@ -1,6 +1,7 @@
 """Datasets, on tiny synthetic copies of each format."""
 
 import numpy as np
+import pandas as pd
 import pytest
 import torch
 from PIL import Image
@@ -142,6 +143,20 @@ def test_captions_are_kept_as_written(roots):
     assert {"photo 0 caption 4", "coco train 0 0", "coco restval 1 4"} <= set(texts)
     with pytest.raises(ValueError):
         data.Captions("flickr+imagenet")
+
+
+def test_paired_captions_are_every_caption_of_the_first_shuffled_pairs_with_their_features(tmp_path):
+    df = pd.DataFrame({"captions": [[f"pair {i} caption {j} " for j in range(2 + i % 2)] for i in range(10)]})
+    df.to_parquet(tmp_path / "pairs.parquet")
+    order = df.sample(frac=1, random_state=0).index.tolist()  # the order of the rows of the features
+    torch.save(torch.tensor(order, dtype=torch.float32)[:, None].repeat(1, 3), tmp_path / "x.pt")
+    ds = data.PairedCaptions(f"{tmp_path / 'pairs.parquet'}:4", tmp_path / "x.pt")
+    items = [ds[i] for i in range(len(ds))]
+    assert [c for c, _ in items] == [f"pair {i} caption {j}" for i in order[:4] for j in range(2 + i % 2)]
+    assert all(torch.equal(x, torch.full((3,), float(c.split()[1]))) for c, x in items)  # each with its own pair's
+    torch.save(torch.zeros(9, 3), tmp_path / "x.pt")  # not one row per pair
+    with pytest.raises(ValueError):
+        data.PairedCaptions(f"{tmp_path / 'pairs.parquet'}:4", tmp_path / "x.pt")
 
 
 def test_overlap_finds_wit_captions_and_flickr_and_coco_photos_in_a_recap_file(tmp_path):

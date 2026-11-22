@@ -26,11 +26,13 @@ class TextView(transforms.Transform):
         max_len: output length, special tokens included.
         pair: next-token control: concatenate two different captions ``[CLS] a [SEP] b [SEP]``, uncropped (one
             caption if there is only one).
+        index: good views without repeats: this view reads caption ``index`` (cycling) of a list that
+            :func:`_shuffle` put in random order, instead of drawing one.
     """
 
-    def __init__(self, tok, scale=(1.0, 1.0), mask_ratio=0.0, max_len=64, pair=False):
+    def __init__(self, tok, scale=(1.0, 1.0), mask_ratio=0.0, max_len=64, pair=False, index=None):
         super().__init__()
-        self.scale, self.mask_ratio, self.max_len, self.pair = scale, mask_ratio, max_len, pair
+        self.scale, self.mask_ratio, self.max_len, self.pair, self.index = scale, mask_ratio, max_len, pair, index
         self.cls, self.sep, self.mask, self.pad = tok.cls_token_id, tok.sep_token_id, tok.mask_token_id, tok.pad_token_id
 
     def _frame(self, *parts):
@@ -47,7 +49,7 @@ class TextView(transforms.Transform):
             x["text"] = self._frame(ids[i][:h], ids[j][:h])
             return x
         if isinstance(ids, list):  # good views: each view draws its own caption of the image
-            ids = ids[torch.randint(len(ids), ()).item()]
+            ids = ids[torch.randint(len(ids), ()).item() if self.index is None else self.index % len(ids)]
         ids = ids[: self.max_len - 2]
         if len(ids):  # an empty caption stays [CLS] [SEP]
             lo, hi = self.scale
@@ -109,6 +111,13 @@ class Photometric(nn.Module):
         return batch
 
 
+def _shuffle(x):
+    """Good text views without repeats: the captions in a random order, read in turn by ``TextView(index=i)``."""
+    if isinstance(x["text"], list):
+        x["text"] = [x["text"][i] for i in torch.randperm(len(x["text"])).tolist()]
+    return x
+
+
 def _pick(x):
     """Good image views: a view of a clip (a list of frames) draws its own frame."""
     if isinstance(x["image"], list):
@@ -139,6 +148,7 @@ def view_transforms(
     lscale=(0.15, 0.5),
     mask=0.15,
     max_len=64,
+    distinct=False,
 ):
     """Views of one training arm.
 
@@ -152,6 +162,8 @@ def view_transforms(
         lscale: kept caption fraction of local text views.
         mask: masked fraction of text-view tokens.
         max_len: tokens per text view.
+        distinct: good text views draw the captions without repeats (shuffled once per item, view ``i`` reads caption
+            ``i``, cycling), so the global views always read different captions when there are several.
 
     Returns:
         ``(train_cpu, eval, train_gpu)`` transforms; ``train_gpu`` is ``None`` for text.
@@ -172,7 +184,7 @@ def view_transforms(
 
         crops = [crop(224, (0.3, 1.0)) for _ in range(views[0])] + [crop(96, (0.05, 0.3)) for _ in range(views[1])]
         return transforms.MultiViewTransform(crops), image_eval_view(), Photometric(views[0])
-    text = [TextView(tok, gscale, mask, max_len) for _ in range(views[0])] + [
-        TextView(tok, lscale, mask, max_len) for _ in range(views[1])
-    ]
-    return transforms.MultiViewTransform(text), TextView(tok), None
+    at = range(views[0] + views[1]) if distinct else [None] * (views[0] + views[1])
+    text = [TextView(tok, gscale if i < views[0] else lscale, mask, max_len, index=j) for i, j in enumerate(at)]
+    multi = transforms.MultiViewTransform(text)
+    return (transforms.Compose(_shuffle, multi) if distinct else multi), TextView(tok), None
